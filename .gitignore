@@ -1,0 +1,10 @@
+node_modules/
+.env
+dist/
+.next/
+.vscode/
+npm-debug.log
+yarn-error.log
+package-lock.json
+buildx/frontend/node_modules/
+buildx/backend/node_modules/

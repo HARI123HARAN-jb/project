@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  password  String
+  role      Role      @default(CUSTOMER)
+  name      String
+  createdAt DateTime  @default(now())
+
+  orders    Order[]
+  companies Company[]
+}
+
+model Company {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId        String   @db.ObjectId
+  owner          User     @relation(fields: [ownerId], references: [id])
+  name           String
+  category       String[]
+  kycVerified    Boolean  @default(false)
+  
+  acceptedOrders Order[]  @relation("CompanyAcceptedOrders")
+}
+
+model Order {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  customerId    String      @db.ObjectId
+  customer      User        @relation(fields: [customerId], references: [id])
+  
+  title         String
+  description   String
+  refinedReq    String?
+  category      String
+  budgetRange   String
+  status        OrderStatus @default(PENDING)
+  
+  acceptedById  String?     @db.ObjectId
+  acceptedBy    Company?    @relation("CompanyAcceptedOrders", fields: [acceptedById], references: [id])
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  DELIVERED
+}
